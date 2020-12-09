@@ -24,6 +24,9 @@
 	bomb_1.volume = 70
 	bomb_2.temperature = T20C
 	bomb_2.volume = 70
+	tank_mix.assert_gases(arglist(GLOB.hardcoded_gases))
+	bomb_1.assert_gases(arglist(GLOB.hardcoded_gases))
+	bomb_2.assert_gases(arglist(GLOB.hardcoded_gases))
 	..()
 
 /obj/machinery/computer/atmos_sim/proc/simulate_bomb()
@@ -80,9 +83,8 @@
 		dat += "<tr><td colspan=2><a href='?src=[REF(src)];mix=[mix_id];change_volume=1'>Volume: [mix.return_volume()] L</a></td><td colspan=2><a href='?src=[REF(src)];mix=[mix_id];change_temperature=1'>Temp: [mix.return_temperature()] K</a></td></tr>"
 	else
 		dat += "<tr><td colspan=1>Volume: [mix.return_volume()] L</td><td colspan=2>Temp: [mix.return_temperature()] K</td></tr>"
-	var/list/valid_gas_types = subtypesof(/datum/gas)
-	for(var/id in (mix_id ? valid_gas_types : mix.gases))
-		var/list/moles = mix.gases[id]
+	for(var/id in (mix_id ? GLOB.meta_gas_info : mix.gases))
+		var/list/moles = mix.gases[id][MOLES]
 		dat += "<tr>"
 		if(mix_id)
 			dat += "<td><a href='?src=[REF(src)];mix=[mix_id];delete_gas=[id]'>X</a></td>"
@@ -107,14 +109,14 @@
 			var/new_moles = input(usr, "Enter a new mole count for [GLOB.meta_gas_info[id][META_GAS_NAME]]", name) as null|num
 			if(!src || !usr || !usr.canUseTopic(src) || QDELETED(src) || new_moles == null)
 				return
-			mix.gases[id] = new_moles
+			mix.gases[id][MOLES] = new_moles
 	if(href_list["change_pressure"])
 		var/id = text2path(href_list["change_pressure"])
 		if(GLOB.meta_gas_info[id])
 			var/new_pressure = input(usr, "Enter a new pressure for [GLOB.meta_gas_info[id][META_GAS_NAME]]", name) as null|num
 			if(!src || !usr || !usr.canUseTopic(src) || QDELETED(src) || new_pressure == null)
 				return
-			mix.gases[id] = new_pressure / R_IDEAL_GAS_EQUATION / mix.temperature * mix.volume
+			mix.gases[id][MOLES] = new_pressure / R_IDEAL_GAS_EQUATION / mix.temperature * mix.volume
 	if(href_list["change_volume"])
 		var/volume_type = input(usr, "Select a container type", name) as null|anything in list("Custom", "Floor Tile", "Canister", "Portable Tank")
 		if(!src || !usr || !usr.canUseTopic(src) || QDELETED(src) || volume_type == null)
@@ -139,7 +141,7 @@
 		new_temp = max(TCMB, new_temp)
 		var/temp_ratio = mix.temperature / new_temp
 		for(var/gas_id in mix.gases)
-			mix.gases[gas_id] *= temp_ratio // Preserve the pressure
+			mix.gases[gas_id][MOLES] *= temp_ratio // Preserve the pressure
 		mix.temperature = new_temp
 
 /obj/machinery/computer/atmos_sim/Topic(href, href_list)

@@ -40,7 +40,9 @@
 	cmd_admin_pm(targets[target],null)
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "Admin PM") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
-/client/proc/cmd_ahelp_reply(whom)
+// SKYRAT EDIT CHANGE ORIGINAL
+// /client/proc/cmd_ahelp_reply(whom)
+/client/proc/cmd_ahelp_reply(whom, ticket) // SKYRAT EDIT
 	if(prefs.muted & MUTE_ADMINHELP)
 		to_chat(src,
 			type = MESSAGE_TYPE_ADMINPM,
@@ -62,7 +64,15 @@
 				confidential = TRUE)
 		return
 
-	var/datum/admin_help/AH = C.current_ticket
+	//var/datum/admin_help/AH = C.current_ticket // SKYRAT EDIT REMOVAL -- Personal ticket system
+
+	// SKYRAT EDIT ADDITION START -- Personal ticket system
+	var/datum/admin_help/AH = ticket 
+
+	if(AH.state != AHELP_ACTIVE)
+		to_chat(src, "<span class='danger'>This is no longer an active ticket, it would need to be reopened, or another ticket will need to be made.</span>")
+		return
+	// SKYRAT EDIT ADDITION END
 
 	if(AH)
 		message_admins("[key_name_admin(src)] has started replying to [key_name_admin(C, 0, 0)]'s admin help.")
@@ -84,11 +94,13 @@
 				confidential = TRUE)
 			AH.AddInteraction("<b>No client found, message not sent:</b><br>[msg]")
 			return
-	cmd_admin_pm(whom, msg)
+	// cmd_admin_pm(whom, msg) // SKYRAT EDIT ORIGINAL
+	cmd_admin_pm(whom, msg, ticket) // SKYRAT EDIT -- Personal ticket system
 
 //takes input from cmd_admin_pm_context, cmd_admin_pm_panel or /client/Topic and sends them a PM.
 //Fetching a message if needed. src is the sender and C is the target client
-/client/proc/cmd_admin_pm(whom, msg)
+// /client/proc/cmd_admin_pm(whom, msg) // SKYRAT EDIT ORIGINAL
+/client/proc/cmd_admin_pm(whom, msg, ticket)
 	if(prefs.muted & MUTE_ADMINHELP)
 		to_chat(src,
 			type = MESSAGE_TYPE_ADMINPM,
@@ -96,7 +108,10 @@
 			confidential = TRUE)
 		return
 
-	if(!holder && !current_ticket)	//no ticket? https://www.youtube.com/watch?v=iHSPf6x1Fdo
+	var/datum/admin_help/AH = ticket // SKYRAT EDIT -- Player ticket system
+
+	// if(!holder && !current_ticket)	// SKRYAT EDIT ORIGINAL
+	if(!holder && !AH)	//no ticket? https://www.youtube.com/watch?v=iHSPf6x1Fdo // SKYRAT EDIT -- Player ticket system
 		to_chat(src,
 			type = MESSAGE_TYPE_ADMINPM,
 			html = "<span class='danger'>You can no longer reply to this ticket, please open another one by using the Adminhelp verb if need be.</span>",

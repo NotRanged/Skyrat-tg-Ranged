@@ -1,5 +1,8 @@
 /client/var/adminhelptimerid = 0	//a timer id for returning the ahelp verb
-/client/var/datum/admin_help/current_ticket	//the current ticket the (usually) not-admin client is dealing with
+// SKYRAT EDIT ORIGINAL
+// /client/var/datum/admin_help/current_ticket	//the current ticket the (usually) not-admin client is dealing with
+/client/var/list/tickets = list()	// SKYRAT EDIT CHANGE -- tickets the (usually) not-admin client is dealing with 
+
 
 //
 //TICKET MANAGER
@@ -117,6 +120,9 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	//SKYRAT EDIT ADDITION END
 	return L
 
+
+// SKYRAT EDIT MOVE -- Moved to modular_skyrat
+/*
 //Reassociate still open ticket if one exists
 /datum/admin_help_tickets/proc/ClientLogin(client/C)
 	C.current_ticket = CKey2ActiveTicket(C.ckey)
@@ -139,6 +145,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		var/datum/admin_help/AH = I
 		if(AH.initiator_ckey == ckey)
 			return AH
+*/ // SKYRAT EDIT MOVE END
 
 //
 //TICKET LIST STATCLICK
@@ -176,6 +183,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	var/heard_by_no_admins = FALSE
 
 	var/list/_interactions	//use AddInteraction() or, preferably, admin_ticket_log()
+	var/list/_interactions_user // SKYRAT EDIT ADDITION -- personal ahelp viewing
 
 	var/obj/effect/statclick/ahelp/statclick
 
@@ -205,19 +213,28 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	initiator = C
 	initiator_ckey = initiator.ckey
 	initiator_key_name = key_name(initiator, FALSE, TRUE)
+	// SKYRAT EDIT REMOVAL -- Player ticket system
+	/*
 	if(initiator.current_ticket)	//This is a bug
 		stack_trace("Multiple ahelp current_tickets")
 		initiator.current_ticket.AddInteraction("Ticket erroneously left open by code")
 		initiator.current_ticket.Close()
 	initiator.current_ticket = src
+	*/
+	// SKYRAT EDIT REMOVAL END
+
+	initiator.tickets += src // SKYRAT EDIT ADDITION -- Player ticket system
 
 	TimeoutVerb()
 
 	statclick = new(null, src)
 	_interactions = list()
+	_interactions_user = list() // SKYRAT EDIT ADDITION -- Player ticket system
 
 	if(is_bwoink)
-		AddInteraction("<font color='blue'>[key_name_admin(usr)] PM'd [LinkedReplyName()]</font>")
+		// SKYRATE EDIT ORIGINAL -- Player ticket system
+		// AddInteraction("<font color='blue'>[key_name_admin(usr)] PM'd [LinkedReplyName()]</font>")
+		AddInteraction("<font color='blue'>[key_name_admin(usr, ticket=src)] PM'd [LinkedReplyName()]</font>") // SKYRAT EDIT
 		message_admins("<font color='blue'>Ticket [TicketHref("#[id]")] created</font>")
 	else
 		MessageNoRecipient(msg)
@@ -236,11 +253,19 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	GLOB.ahelp_tickets.resolved_tickets -= src
 	return ..()
 
-/datum/admin_help/proc/AddInteraction(formatted_message)
+
+// SKYRAT EDIT ORIGINAL
+// /datum/admin_help/proc/AddInteraction(formatted_message)
+/datum/admin_help/proc/AddInteraction(formatted_message, admin_only = FALSE)
 	if(heard_by_no_admins && usr && usr.ckey != initiator_ckey)
 		heard_by_no_admins = FALSE
 		send2adminchat(initiator_ckey, "Ticket #[id]: Answered by [key_name(usr)]")
 	_interactions += "[time_stamp()]: [formatted_message]"
+
+	// SKYRAT EDIT ADDITION START -- Personal Ahelp Viewing
+	if(!admin_only)
+		_interactions_user += "[TIME_STAMP("hh:mm:ss", FALSE)]: [formatted_message]"
+	// SKYRAT EDIT ADDITION END
 
 //Removes the ahelp verb and returns it after 2 minutes
 /datum/admin_help/proc/TimeoutVerb()
@@ -311,9 +336,13 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		to_chat(usr, "<span class='warning'>This ticket is already open.</span>", confidential = TRUE)
 		return
 
+
+	// SKYRAT EDIT REMOVAL -- Personal Ahelp Viewing
+	/*
 	if(GLOB.ahelp_tickets.CKey2ActiveTicket(initiator_ckey))
 		to_chat(usr, "<span class='warning'>This user already has an active ticket, cannot reopen this one.</span>", confidential = TRUE)
 		return
+	*/ // SKYRAT EDIT REMOVAL END
 
 	statclick = new(null, src)
 	GLOB.ahelp_tickets.active_tickets += src
@@ -326,8 +355,12 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 			SSblackbox.record_feedback("tally", "ahelp_stats", -1, "resolved")
 	state = AHELP_ACTIVE
 	closed_at = null
+	// SKYRAT EDIT REMOVAL -- Personal Ahelp Viewing
+	/*
 	if(initiator)
 		initiator.current_ticket = src
+	*/ // SKYRAT EDIT REMOVAL END
+
 
 	AddInteraction("<font color='purple'>Reopened by [key_name_admin(usr)]</font>")
 	var/msg = "<span class='adminhelp'>Ticket [TicketHref("#[id]")] reopened by [key_name_admin(usr)].</span>"
@@ -344,8 +377,12 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	closed_at = world.time
 	QDEL_NULL(statclick)
 	GLOB.ahelp_tickets.active_tickets -= src
+	// SKYRAT EDIT REMOVAL -- Personal Ahelp Viewing
+	/*
 	if(initiator && initiator.current_ticket == src)
 		initiator.current_ticket = null
+	*/ // SKYRAT EDIT REMOVAL END
+
 
 //Mark open ticket as closed/meme
 /datum/admin_help/proc/Close(key_name = key_name_admin(usr), silent = FALSE)
@@ -503,7 +540,9 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		if("reject")
 			Reject()
 		if("reply")
-			usr.client.cmd_ahelp_reply(initiator)
+			// SKYRAT EDIT  ORIGINAL -- Personal ticket system
+			// usr.client.cmd_ahelp_reply(initiator)
+			usr.client.cmd_ahelp_reply(initiator, src)
 		if("icissue")
 			ICIssue()
 		if("close")
@@ -552,6 +591,8 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	var/msg = input(src, "Please describe your problem concisely and an admin will help as soon as they're able.", "Adminhelp contents") as message|null
 	adminhelp(msg)
 
+
+/* SKYRAT EDIT MOVE -- MOVED TO MODULAR_SKYART
 /client/verb/adminhelp(msg as message)
 	set category = "Admin"
 	set name = "Adminhelp"
@@ -602,6 +643,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		if(AH)
 			AH.AddInteraction(message)
 			return AH
+*/ // SKYRAT EDIT MOVE END
 
 //
 // HELPER PROCS

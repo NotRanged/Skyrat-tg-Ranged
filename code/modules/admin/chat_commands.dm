@@ -35,7 +35,9 @@
 	if(id != null)
 		var/datum/admin_help/AH = GLOB.ahelp_tickets.TicketByID(id)
 		if(AH)
-			target = AH.initiator_ckey
+			// SKYRAT EDIT ORIGINAL -- Player tickets
+			// target = AH.initiator_ckey
+			target = AH
 		else
 			return "Ticket #[id] not found!"
 	var/res = TgsPm(target, all_params.Join(" "), sender.friendly_name)

@@ -91,6 +91,20 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 	// Log all hrefs
 	log_href("[src] (usr:[usr]\[[COORD(usr)]\]) : [hsrc ? "[hsrc] " : ""][href]")
 
+	//SKYRAT EDIT ADDITION BEGIN - PERSONAL AHELP TICKETS
+	if(href_list["my_ahelp_tickets"])
+		GLOB.ahelp_tickets.BrowserPlayerTickets()
+		return
+
+	if(href_list["ahelp_player"])
+		var/ahelp_ref = href_list["ahelp_player"]
+		var/datum/admin_help/AH = locate(ahelp_ref)
+
+		switch(href_list["ahelp_action"])
+			if("player_ticket")
+				AH.PlayerTicketPanel()
+	// SKYRATE EDIT ADDITION END
+
 	//byond bug ID:2256651
 	if (asset_cache_job && (asset_cache_job in completed_asset_jobs))
 		to_chat(src, "<span class='danger'>An error has been detected in how your client is receiving resources. Attempting to correct.... (If you keep seeing these messages you might want to close byond and reconnect)</span>")

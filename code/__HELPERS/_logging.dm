@@ -278,6 +278,7 @@ GLOBAL_LIST_INIT(testing_global_profiler, list("_PROFILE_NAME" = "Global"))
 
 
 /* Helper procs for building detailed log lines */
+/* SKYRAT EDIT MOVE -- Moved to modular_skyrat
 /proc/key_name(whom, include_link = null, include_name = TRUE)
 	var/mob/M
 	var/client/C
@@ -362,6 +363,7 @@ GLOBAL_LIST_INIT(testing_global_profiler, list("_PROFILE_NAME" = "Global"))
 
 /proc/key_name_admin(whom, include_name = TRUE)
 	return key_name(whom, TRUE, include_name)
+*/ // SKYRAT EDIT MOVE END
 
 /proc/loc_name(atom/A)
 	if(!istype(A))

@@ -4,7 +4,7 @@
 	desc = "A portable(ish) machine made to print tiny modular circuitry out of metal."
 	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_tools.dmi'
 	icon_state = "circuit_printer"
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	var/metal = 0
 	var/max_metal = 100
 	var/metal_per_sheet = 10 // One sheet equals this much metal.
@@ -173,7 +173,7 @@
 	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_tools.dmi'
 	icon_state = "upgrade_disk"
 	item_state = "card-id"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	origin_tech = list(TECH_ENGINEERING = 3, TECH_DATA = 4)
 
 /obj/item/weapon/disk/integrated_circuit/upgrade/advanced

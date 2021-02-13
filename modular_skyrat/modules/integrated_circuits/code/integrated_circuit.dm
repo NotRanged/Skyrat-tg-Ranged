@@ -9,7 +9,7 @@ GLOBAL_LIST_INIT(all_integrated_circuits, list())
 	desc = "It's a tiny chip!  This one doesn't seem to do much, however."
 	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_components.dmi'
 	icon_state = "template"
-	w_class = ITEMSIZE_TINY
+	w_class = WEIGHT_CLASS_TINY
 	var/obj/item/device/electronic_assembly/assembly = null // Reference to the assembly holding this circuit, if any.
 	var/extended_desc = null
 	var/list/inputs = list()

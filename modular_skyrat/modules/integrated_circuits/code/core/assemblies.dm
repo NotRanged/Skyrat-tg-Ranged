@@ -7,7 +7,7 @@
 /obj/item/device/electronic_assembly
 	name = "electronic assembly"
 	desc = "It's a case, for building small electronics with."
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_setups.dmi'
 	icon_state = "setup_small"
 	show_messages = TRUE

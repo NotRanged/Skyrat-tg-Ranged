@@ -9,7 +9,7 @@
 	desc = "It's a small wiring tool, with a wire roll, electric soldering iron, wire cutter, and more in one package. \
 	The wires used are generally useful for small electronics, such as circuitboards and breadboards, as opposed to larger wires \
 	used for power or data transmission."
-	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronicselectronic_tools.dmi'
+	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_tools.dmi'
 	icon_state = "wirer-wire"
 	item_state = "wirer"
 	w_class = ITEMSIZE_SMALL
@@ -107,7 +107,7 @@
 	name = "circuit debugger"
 	desc = "This small tool allows one working with custom machinery to directly set data to a specific pin, useful for writing \
 	settings to specific circuits, or for debugging purposes.  It can also pulse activation pins."
-	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronicselectronic_tools.dmi'
+	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_tools.dmi'
 	icon_state = "debugger"
 	w_class = 2
 	var/data_to_write = null
@@ -261,7 +261,7 @@
 /obj/item/weapon/storage/bag/circuits
 	name = "circuit kit"
 	desc = "This kit's essential for any circuitry projects."
-	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronicselectronic_misc.dmi'
+	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_misc.dmi'
 	icon_state = "circuit_kit"
 	w_class = 3
 	display_contents_with_number = 0

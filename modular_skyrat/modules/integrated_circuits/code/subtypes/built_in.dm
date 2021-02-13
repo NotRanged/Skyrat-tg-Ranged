@@ -1,7 +1,7 @@
 /obj/item/integrated_circuit/built_in
 	name = "integrated circuit"
 	desc = "It's a tiny chip!  This one doesn't seem to do much, however."
-	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronicselectronic_setups.dmi'
+	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_setups.dmi'
 	icon_state = "template"
 	size = -1
 	w_class = ITEMSIZE_TINY

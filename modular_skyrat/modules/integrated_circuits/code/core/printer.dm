@@ -2,7 +2,7 @@
 /obj/item/device/integrated_circuit_printer
 	name = "integrated circuit printer"
 	desc = "A portable(ish) machine made to print tiny modular circuitry out of metal."
-	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronicselectronic_tools.dmi'
+	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_tools.dmi'
 	icon_state = "circuit_printer"
 	w_class = ITEMSIZE_LARGE
 	var/metal = 0
@@ -170,7 +170,7 @@
 /obj/item/weapon/disk/integrated_circuit/upgrade
 	name = "integrated circuit printer upgrade disk"
 	desc = "Install this into your integrated circuit printer to enhance it."
-	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronicselectronic_tools.dmi'
+	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_tools.dmi'
 	icon_state = "upgrade_disk"
 	item_state = "card-id"
 	w_class = ITEMSIZE_SMALL

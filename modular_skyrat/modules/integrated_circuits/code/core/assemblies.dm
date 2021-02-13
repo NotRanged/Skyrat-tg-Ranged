@@ -8,7 +8,7 @@
 	name = "electronic assembly"
 	desc = "It's a case, for building small electronics with."
 	w_class = ITEMSIZE_SMALL
-	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronicselectronic_setups.dmi'
+	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_setups.dmi'
 	icon_state = "setup_small"
 	show_messages = TRUE
 	var/max_components = IC_COMPONENTS_BASE
@@ -154,7 +154,7 @@
 	cut_overlays()
 	if(detail_color == COLOR_ASSEMBLY_BLACK) //Black colored overlay looks almost but not exactly like the base sprite, so just cut the overlay and avoid it looking kinda off.
 		return
-	var/mutable_appearance/detail_overlay = mutable_appearance('modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronicselectronic_setups.dmi', "[icon_state]-color")
+	var/mutable_appearance/detail_overlay = mutable_appearance('modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_setups.dmi', "[icon_state]-color")
 	detail_overlay.color = detail_color
 	add_overlay(detail_overlay)
 

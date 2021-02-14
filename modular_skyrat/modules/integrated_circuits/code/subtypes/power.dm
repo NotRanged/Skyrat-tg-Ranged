@@ -42,7 +42,7 @@
 			return FALSE // Pointless to do everything else if there's no battery to draw from.
 
 		var/obj/item/stock_parts/cell/cell = null
-		if(istype(AM, /obj/item/weapon/cell)) // Is this already a cell?
+		if(istype(AM, /obj/item/stock_parts/cell)) // Is this already a cell?
 			cell = AM
 		else // If not, maybe there's a cell inside it?
 			for(var/obj/item/stock_parts/cell/C in AM.contents)
@@ -57,11 +57,11 @@
 				if(AM.loc != assembly)
 					transfer_amount *= 0.8 // Losses due to distance.
 
-				if(cell.fully_charged())
+				if(cell.charge >= cell.maxcharge)
 					return FALSE
 
 				if(transfer_amount && assembly.draw_power(amount_to_move)) // CELLRATE is already handled in draw_power()
-					cell.give(transfer_amount * CELLRATE)
+					cell.give(transfer_amount * GLOB.CELLRATE)
 				AM.update_icon()
 
 				set_pin_data(IC_OUTPUT, 1, cell.charge)
@@ -82,7 +82,7 @@
 /obj/item/integrated_circuit/power/transmitter/large/do_work()
 	if(..()) // If the above code succeeds, do this below.
 		if(prob(2))
-			var/datum/effect/effect/system/spark_spread/sparks = new /datum/effect/effect/system/spark_spread()
+			var/datum/effect_system/spark_spread/sparks = new
 			sparks.set_up(3, 0, get_turf(src))
 			sparks.start()
 			visible_message("<span class='warning'>\The [assembly] makes some sparks!</span>")

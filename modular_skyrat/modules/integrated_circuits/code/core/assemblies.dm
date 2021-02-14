@@ -10,7 +10,6 @@
 	w_class = WEIGHT_CLASS_SMALL
 	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_setups.dmi'
 	icon_state = "setup_small"
-	show_messages = TRUE
 	var/max_components = IC_COMPONENTS_BASE
 	var/max_complexity = IC_COMPLEXITY_BASE
 	var/opened = FALSE
@@ -79,7 +78,7 @@
 	HTML += "[total_complexity]/[max_complexity] ([round((total_complexity / max_complexity) * 100, 0.1)]%) maximum complexity.<br>"
 	if(battery)
 		HTML += "[round(battery.charge, 0.1)]/[battery.maxcharge] ([round(battery.percent(), 0.1)]%) cell charge. <a href='?src=\ref[src];remove_cell=1'>\[Remove\]</a><br>"
-		HTML += "Net energy: [format_SI(net_power / CELLRATE, "W")]."
+		HTML += "Net energy: [DisplayPower(net_power / GLOB.CELLRATE)]."
 	else
 		HTML += "<span class='danger'>No powercell detected!</span>"
 	HTML += "<br><br>"
@@ -165,12 +164,6 @@
 	for(var/obj/item/integrated_circuit/part in contents)
 		. |= part.GetAccess()
 
-/obj/item/device/electronic_assembly/GetIdCard()
-	. = list()
-	for(var/obj/item/integrated_circuit/part in contents)
-		var/id_card = part.GetIdCard()
-		if(id_card)
-			return id_card
 
 /obj/item/device/electronic_assembly/examine(mob/user)
 	. = ..()
@@ -236,7 +229,7 @@
 /obj/item/device/electronic_assembly/attackby(var/obj/item/I, var/mob/user)
 	if(can_anchor && I.is_wrench())
 		anchored = !anchored
-		to_chat(user, span("notice", "You've [anchored ? "" : "un"]secured \the [src] to \the [get_turf(src)]."))
+		to_chat(user, "<span class='notice'>You've [anchored ? "" : "un"]secured \the [src] to \the [get_turf(src)].</span>")
 		if(anchored)
 			on_anchored()
 		else
@@ -245,7 +238,7 @@
 		return TRUE
 
 	else if(istype(I, /obj/item/integrated_circuit))
-		if(!user.unEquip(I) && !istype(user, /mob/living/silicon/robot)) //Robots cannot de-equip items in grippers.
+		if(!user.transferItemToLoc(I, src)) //Robots cannot de-equip items in grippers.
 			return FALSE
 		if(add_circuit(I, user))
 			to_chat(user, "<span class='notice'>You slide \the [I] inside \the [src].</span>")
@@ -253,7 +246,7 @@
 			interact(user)
 			return TRUE
 
-	else if(I.is_crowbar())
+	else if(I.tool_behaviour == TOOL_CROWBAR)
 		playsound(src, 'sound/items/Crowbar.ogg', 50, 1)
 		opened = !opened
 		to_chat(user, "<span class='notice'>You [opened ? "opened" : "closed"] \the [src].</span>")
@@ -274,7 +267,7 @@
 		detail_color = D.detail_color
 		update_icon()
 
-	else if(istype(I, /obj/item/weapon/cell/device))
+	else if(istype(I, /obj/item/stock_parts/cell))
 		if(!opened)
 			to_chat(user, "<span class='warning'>\The [src] isn't opened, so you can't put anything inside.  Try using a crowbar.</span>")
 			return FALSE
@@ -282,7 +275,7 @@
 			to_chat(user, "<span class='warning'>\The [src] already has \a [battery] inside.  Remove it first if you want to replace it.</span>")
 			return FALSE
 		var/obj/item/stock_parts/cell/cell = I
-		user.drop_item(cell)
+		user.dropItemToGround(cell, TRUE, TRUE)
 		cell.forceMove(src)
 		battery = cell
 		playsound(src, 'sound/items/Deconstruct.ogg', 50, 1)
@@ -337,7 +330,7 @@
 // Returns true if power was successfully drawn.
 /obj/item/device/electronic_assembly/proc/draw_power(amount)
 	if(battery)
-		var/lost = battery.use(amount * CELLRATE)
+		var/lost = battery.use(amount * GLOB.CELLRATE)
 		net_power -= lost
 		return lost > 0
 	return FALSE
@@ -345,7 +338,7 @@
 // Ditto for giving.
 /obj/item/device/electronic_assembly/proc/give_power(amount)
 	if(battery)
-		var/gained = battery.give(amount * CELLRATE)
+		var/gained = battery.give(amount * GLOB.CELLRATE)
 		net_power += gained
 		return TRUE
 	return FALSE
@@ -360,4 +353,4 @@
 
 // Returns TRUE if I is something that could/should have a valid interaction. Used to tell circuitclothes to hit the circuit with something instead of the clothes
 /obj/item/device/electronic_assembly/proc/is_valid_tool(var/obj/item/I)
-	return I.is_crowbar() || I.is_screwdriver() || istype(I, /obj/item/integrated_circuit) || istype(I, /obj/item/weapon/cell/device) || istype(I, /obj/item/device/integrated_electronics)
+	return I.is_crowbar() || I.is_screwdriver() || istype(I, /obj/item/integrated_circuit) || istype(I, /obj/item/stock_parts/cell) || istype(I, /obj/item/device/integrated_electronics)

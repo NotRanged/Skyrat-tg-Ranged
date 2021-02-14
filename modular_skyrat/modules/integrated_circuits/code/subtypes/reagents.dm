@@ -1,12 +1,13 @@
 /obj/item/integrated_circuit/reagent
 	category_text = "Reagent"
 	var/volume = 0
-	unacidable = 1
+	var/reagent_flags
+	resistance_flags = UNACIDABLE
 
-/obj/item/integrated_circuit/reagent/New()
-	..()
+/obj/item/integrated_circuit/reagent/Initialize()
+	. = ..()
 	if(volume)
-		create_reagents(volume)
+		create_reagents(volume, reagent_flags)
 
 /obj/item/integrated_circuit/reagent/smoke
 	name = "smoke generator"
@@ -14,7 +15,7 @@
 	icon_state = "smoke"
 	extended_desc = "This smoke generator creates clouds of smoke on command.  It can also hold liquids inside, which will go \
 	into the smoke clouds when activated.  The reagents are consumed when smoke is made."
-	flags = OPENCONTAINER
+	reagent_flags = OPENCONTAINER
 	complexity = 20
 	cooldown_per_use = 30 SECONDS
 	inputs = list()
@@ -36,7 +37,7 @@
 
 /obj/item/integrated_circuit/reagent/smoke/do_work()
 	playsound(src, 'sound/effects/smoke.ogg', 50, 1, -3)
-	var/datum/effect/effect/system/smoke_spread/chem/smoke_system = new()
+	var/datum/effect_system/smoke_spread/chem/smoke_system = new()
 	smoke_system.set_up(reagents, 10, 0, get_turf(src))
 	spawn(0)
 		for(var/i = 1 to 8)
@@ -50,7 +51,7 @@
 	icon_state = "injector"
 	extended_desc = "This autoinjector can push reagents into another container or someone else outside of the machine.  The target \
 	must be adjacent to the machine, and if it is a person, they cannot be wearing thick clothing. A negative amount makes the injector draw out reagents."
-	flags = OPENCONTAINER
+	reagent_flags = OPENCONTAINER
 	complexity = 20
 	cooldown_per_use = 6 SECONDS
 	inputs = list("target" = IC_PINTYPE_REF, "injection amount" = IC_PINTYPE_NUMBER)
@@ -62,6 +63,8 @@
 	power_draw_per_use = 15
 	var/direc = 1
 	var/transfer_amount = 10
+	/// needed for delayed drawing of blood
+	var/busy = FALSE
 
 /obj/item/integrated_circuit/reagent/injector/interact(mob/user)
 	set_pin_data(IC_OUTPUT, 2, WEAKREF(src))
@@ -85,8 +88,23 @@
 		transfer_amount = new_amount
 
 
+/obj/item/integrated_circuit/reagent/injector/proc/injection_check(atom/target)
+	if(busy)
+		return FALSE
+	if(get_dist(src, target) > 1 || z != target.z) // Too far
+		return FALSE
+	if(!target.reagents)
+		return FALSE
+
+	if(isliving(target))
+		var/mob/living/living_target = target
+		if(!living_target.try_inject(src, injection_flags = INJECT_TRY_SHOW_ERROR_MESSAGE))
+			return FALSE
+
+	return TRUE
+
 /obj/item/integrated_circuit/reagent/injector/do_work()
-	set waitfor = 0 // Don't sleep in a proc that is called by a processor without this set, otherwise it'll delay the entire thing
+	set waitfor = FALSE // Don't sleep in a proc that is called by a processor without this set, otherwise it'll delay the entire thing
 	var/atom/movable/AM = get_pin_data_as_type(IC_INPUT, 1, /atom/movable)
 	if(!istype(AM)) //Invalid input
 		activate_pin(3)
@@ -100,22 +118,23 @@
 		if(!reagents.total_volume) // Empty
 			activate_pin(3)
 			return
-		if(AM.can_be_injected_by(src))
-			if(isliving(AM))
-				var/mob/living/L = AM
-				var/turf/T = get_turf(AM)
-				T.visible_message("<span class='warning'>[src] is trying to inject [L]!</span>")
-				sleep(3 SECONDS)
-				if(!L.can_be_injected_by(src))
-					activate_pin(3)
-					return
-				var/contained = reagents.get_reagents()
-				var/trans = reagents.trans_to_mob(L, transfer_amount, CHEM_BLOOD)
-				message_admins("[src] injected \the [L] with [trans]u of [contained].")
-				to_chat(AM, "<span class='notice'>You feel a tiny prick!</span>")
-				visible_message("<span class='warning'>[src] injects [L]!</span>")
-			else
-				reagents.trans_to(AM, transfer_amount)
+		if(!injection_check(AM))
+			activate_pin(3)
+			return
+		if(isliving(AM))
+			var/mob/living/L = AM
+			var/turf/T = get_turf(AM)
+			T.visible_message("<span class='warning'>[src] is trying to inject [L]!</span>")
+			sleep(3 SECONDS)
+			if(!injection_check(AM))
+				activate_pin(3)
+				return
+			var/contained = reagents.get_reagents()
+			reagents.trans_to(L, transfer_amount, transfered_by = src, methods = INJECT)
+			to_chat(AM, "<span class='notice'>You feel a tiny prick!</span>")
+			visible_message("<span class='warning'>[src] injects [L]!</span>")
+		else
+			reagents.trans_to(AM, transfer_amount)
 	else
 
 		if(reagents.total_volume >= volume) // Full
@@ -127,56 +146,36 @@
 			return
 		var/turf/TS = get_turf(src)
 		var/turf/TT = get_turf(AM)
-		if(!TS.Adjacent(TT))
+		if(!injection_check(AM))
 			activate_pin(3)
 			return
 		var/tramount = clamp(min(transfer_amount, reagents.maximum_volume - reagents.total_volume), 0, reagents.maximum_volume)
-		if(ismob(target))//Blood!
-			if(istype(target, /mob/living/carbon))
-				var/mob/living/carbon/T = target
-				if(!T.dna)
-					if(T.reagents.trans_to_obj(src, tramount))
-						activate_pin(2)
-					else
-						activate_pin(3)
-					return
-				if(NOCLONE in T.mutations) //target done been et, no more blood in him
-					if(T.reagents.trans_to_obj(src, tramount))
-						activate_pin(2)
-					else
-						activate_pin(3)
-					return
-					return
-				var/datum/reagent/B
-				if(istype(T, /mob/living/carbon/human))
-					var/mob/living/carbon/human/H = T
-					if(H.species && !H.should_have_organ(O_HEART))
-						H.reagents.trans_to_obj(src, tramount)
-					else
-						B = T.take_blood(src, tramount)
-				else
-					B = T.take_blood(src,tramount)
-				if (B)
-					reagents.reagent_list |= B
-					reagents.update_total()
-					on_reagent_change()
-					reagents.handle_reactions()
-					B = null
-				visible_message( "<span class='notice'>Machine takes a blood sample from [target].</span>")
+		if(isliving(target))
+			var/mob/living/living_target = target
+			target.visible_message("<span class='danger'>[src] is trying to take a blood sample from [target]!</span>", \
+							"<span class='userdanger'>[src] is trying to take a blood sample from you!</span>")
+			busy = TRUE
+			sleep(3 SECONDS) // yeah i'm using sleep here fucking sue me
+			busy = FALSE
+			if(!injection_check(AM))
+				activate_pin(3)
+				return
+			if(reagents.total_volume >= reagents.maximum_volume)
+				activate_pin(3)
+				return
+			if(living_target.transfer_blood_to(src, tramount))
+				src.visible_message("<span class='notice'>[src] takes a blood sample from [living_target].</span>")
 			else
 				activate_pin(3)
 				return
 
 		else //if not mob
 			if(!target.reagents.total_volume)
-				visible_message( "<span class='notice'>[target] is empty.</span>")
+				visible_message( "<span class='notice'>[src]: [target] is empty.</span>")
 				activate_pin(3)
 				return
-			target.reagents.trans_to_obj(src, tramount)
+			target.reagents.trans_to(src, tramount)
 	activate_pin(2)
-
-
-
 
 /obj/item/integrated_circuit/reagent/pump
 	name = "reagent pump"
@@ -185,7 +184,7 @@
 	extended_desc = "This is a pump, which will move liquids from the source ref to the target ref.  The third pin determines \
 	how much liquid is moved per pulse, between 0 and 50.  The pump can move reagents to any open container inside the machine, or \
 	outside the machine if it is next to the machine.  Note that this cannot be used on entities."
-	flags = OPENCONTAINER
+	reagent_flags = OPENCONTAINER
 	complexity = 8
 	inputs = list("source" = IC_PINTYPE_REF, "target" = IC_PINTYPE_REF, "injection amount" = IC_PINTYPE_NUMBER)
 	inputs_default = list("3" = 5)
@@ -238,7 +237,7 @@
 	desc = "Stores liquid inside, and away from electrical components.  Can store up to 60u."
 	icon_state = "reagent_storage"
 	extended_desc = "This is effectively an internal beaker."
-	flags = OPENCONTAINER
+	reagent_flags = OPENCONTAINER
 	complexity = 4
 	inputs = list()
 	outputs = list("volume used" = IC_PINTYPE_NUMBER,"self reference" = IC_PINTYPE_REF)
@@ -261,7 +260,7 @@
 	desc = "Stores liquid inside, and away from electrical components.  Can store up to 60u.  This will also suppress reactions."
 	icon_state = "reagent_storage_cryo"
 	extended_desc = "This is effectively an internal cryo beaker."
-	flags = OPENCONTAINER | NOREACT
+	reagent_flags = OPENCONTAINER | NO_REACT
 	complexity = 8
 	spawn_flags = IC_SPAWN_RESEARCH
 
@@ -270,7 +269,7 @@
 	desc = "Stores liquid inside, and away from electrical components.  Can store up to 180u."
 	icon_state = "reagent_storage_big"
 	extended_desc = "This is effectively an internal beaker."
-	flags = OPENCONTAINER
+	reagent_flags = OPENCONTAINER
 	complexity = 16
 	volume = 180
 	spawn_flags = IC_SPAWN_RESEARCH
@@ -280,7 +279,7 @@
 	desc = "Stores liquid inside, and away from electrical components.  Can store up to 60u.  On pulse this beaker will send list of contained reagents."
 	icon_state = "reagent_scan"
 	extended_desc = "Mostly useful for reagent filter."
-	flags = OPENCONTAINER
+	reagent_flags = OPENCONTAINER
 	complexity = 8
 	outputs = list("volume used" = IC_PINTYPE_NUMBER,"self reference" = IC_PINTYPE_REF,"list of reagents" = IC_PINTYPE_LIST)
 	activators = list("scan" = IC_PINTYPE_PULSE_IN)
@@ -289,7 +288,7 @@
 /obj/item/integrated_circuit/reagent/storage/scan/do_work()
 	var/cont[0]
 	for(var/datum/reagent/RE in reagents.reagent_list)
-		cont += RE.id
+		cont += RE.type
 	set_pin_data(IC_OUTPUT, 3, cont)
 	push_data()
 
@@ -302,7 +301,7 @@
 	It will move all reagents, except list, given in fourth pin if amount value is positive.\
 	Or it will move only desired reagents if amount is negative, The third pin determines \
 	how much reagent is moved per pulse, between 0 and 50. Amount is given for each separate reagent."
-	flags = OPENCONTAINER
+	reagent_flags = OPENCONTAINER
 	complexity = 8
 	inputs = list("source" = IC_PINTYPE_REF, "target" = IC_PINTYPE_REF, "injection amount" = IC_PINTYPE_NUMBER, "list of reagents" = IC_PINTYPE_LIST)
 	inputs_default = list("3" = 5)
@@ -342,11 +341,11 @@
 			return
 		for(var/datum/reagent/G in source.reagents.reagent_list)
 			if (!direc)
-				if(G.id in demand)
-					source.reagents.trans_id_to(target, G.id, transfer_amount)
+				if(G.type in demand)
+					source.reagents.trans_id_to(target, G.type, transfer_amount)
 			else
-				if(!(G.id in demand))
-					source.reagents.trans_id_to(target, G.id, transfer_amount)
+				if(!(G.type in demand))
+					source.reagents.trans_id_to(target, G.type, transfer_amount)
 		activate_pin(2)
 		push_data()
 

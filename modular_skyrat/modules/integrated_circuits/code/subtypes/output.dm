@@ -43,7 +43,7 @@
 	var/list/nearby_things = range(0, get_turf(src))
 	for(var/mob/M in nearby_things)
 		var/obj/O = assembly ? assembly : src
-		to_chat(M, "<span class='notice'>[bicon(O)] [stuff_to_display]</span>")
+		to_chat(M, "<span class='notice'>[src]: [stuff_to_display]</span>")
 
 /obj/item/integrated_circuit/output/screen/large
 	name = "large screen"
@@ -56,7 +56,7 @@
 /obj/item/integrated_circuit/output/screen/large/do_work()
 	..()
 	var/obj/O = assembly ? loc : assembly
-	O.visible_message("<span class='notice'>[bicon(O)] [stuff_to_display]</span>")
+	O.visible_message("<span class='notice'>[src]: [stuff_to_display]</span>")
 
 /obj/item/integrated_circuit/output/light
 	name = "light"
@@ -133,8 +133,9 @@
 	text = get_pin_data(IC_INPUT, 1)
 	if(!isnull(text))
 		var/obj/O = assembly ? loc : assembly
-		audible_message("[bicon(O)] \The [O.name] states, \"[text]\"")
+		audible_message("\The [O.name] states, \"[text]\"")
 
+/* SKYRAT PORT -- No impersonation device (couldnt get this to work anyway)
 /obj/item/integrated_circuit/output/text_to_speech/advanced
 	name = "advanced text-to-speech circuit"
 	desc = "A miniature speaker is attached to this component. It is able to transpose any valid text to speech, matching a scanned target's voice."
@@ -160,6 +161,8 @@
 		my_voice.forceMove(get_turf(src))
 		my_voice.say("[text]")
 		my_voice.forceMove(src)
+*/
+
 
 /obj/item/integrated_circuit/output/sound
 	name = "speaker circuit"
@@ -194,7 +197,7 @@
 		var/selected_sound = sounds[ID]
 		if(!selected_sound)
 			return
-		vol = between(0, vol, 100)
+		vol = clamp(0, vol, 100)
 		playsound(src, selected_sound, vol, freq, -1)
 
 /obj/item/integrated_circuit/output/sound/beeper
@@ -218,14 +221,14 @@
 	name = "securitron sound circuit"
 	desc = "A miniature speaker is attached to this component.  Considered by some to be the essential component for a securitron."
 	sounds = list(
-		"creep"			= 'sound/voice/bcreep.ogg',
-		"criminal"		= 'sound/voice/bcriminal.ogg',
-		"freeze"		= 'sound/voice/bfreeze.ogg',
-		"god"			= 'sound/voice/bgod.ogg',
-		"i am the law"	= 'sound/voice/biamthelaw.ogg',
-		"insult"		= 'sound/voice/binsult.ogg',
-		"radio"			= 'sound/voice/bradio.ogg',
-		"secure day"	= 'sound/voice/bsecureday.ogg',
+		"creep"			= 'sound/voice/beepsky/creep.ogg',
+		"criminal"		= 'sound/voice/beepsky/criminal.ogg',
+		"freeze"		= 'sound/voice/beepsky/freeze.ogg',
+		"god"			= 'sound/voice/beepsky/god.ogg',
+		"i am the law"	= 'sound/voice/beepsky/iamthelaw.ogg',
+		"insult"		= 'sound/voice/beepsky/insult.ogg',
+		"radio"			= 'sound/voice/beepsky/radio.ogg',
+		"secure day"	= 'sound/voice/beepsky/secureday.ogg',
 		)
 	spawn_flags = IC_SPAWN_RESEARCH
 
@@ -233,21 +236,30 @@
 	name = "medbot sound circuit"
 	desc = "A miniature speaker is attached to this component, used to annoy patients while they get pricked by a medbot."
 	sounds = list(
-		"surgeon"		= 'sound/voice/medbot/msurgeon.ogg',
-		"radar"			= 'sound/voice/medbot/mradar.ogg',
-		"feel better"	= 'sound/voice/medbot/mfeelbetter.ogg',
-		"patched up"	= 'sound/voice/medbot/mpatchedup.ogg',
-		"injured"		= 'sound/voice/medbot/minjured.ogg',
-		"insult"		= 'sound/voice/medbot/minsult.ogg',
-		"coming"		= 'sound/voice/medbot/mcoming.ogg',
-		"help"			= 'sound/voice/medbot/mhelp.ogg',
-		"live"			= 'sound/voice/medbot/mlive.ogg',
-		"lost"			= 'sound/voice/medbot/mlost.ogg',
-		"flies"			= 'sound/voice/medbot/mflies.ogg',
-		"catch"			= 'sound/voice/medbot/mcatch.ogg',
-		"delicious"		= 'sound/voice/medbot/mdelicious.ogg',
-		"apple"			= 'sound/voice/medbot/mapple.ogg',
-		"no"			= 'sound/voice/medbot/mno.ogg',
+		"surgeon"		= 'sound/voice/medbot/surgeon.ogg',
+		"radar"			= 'sound/voice/medbot/radar.ogg',
+		"feel better"	= 'sound/voice/medbot/feelbetter.ogg',
+		"patched up"	= 'sound/voice/medbot/patchedup.ogg',
+		"injured"		= 'sound/voice/medbot/injured.ogg',
+		"insult"		= 'sound/voice/medbot/insult.ogg',
+		"coming"		= 'sound/voice/medbot/coming.ogg',
+		"help"			= 'sound/voice/medbot/help.ogg',
+		"live"			= 'sound/voice/medbot/live.ogg',
+		"lost"			= 'sound/voice/medbot/lost.ogg',
+		"flies"			= 'sound/voice/medbot/flies.ogg',
+		"catch"			= 'sound/voice/medbot/catch.ogg',
+		"delicious"		= 'sound/voice/medbot/delicious.ogg',
+		"apple"			= 'sound/voice/medbot/apple.ogg',
+		"no"			= 'sound/voice/medbot/no.ogg',
+		"fuck you"		= 'sound/voice/medbot/fuck_you.ogg',
+		"require assistance" = 'sound/voice/medbot/i_require_asst.ogg',
+		"i don't like this" = 'sound/voice/medbot/dont_like.ogg',
+		"forgive you"	= 'sound/voice/medbot/forgive.ogg',
+		"i trusted you" = 'sound/voice/medbot/i_trusted_you.ogg',
+		"nooo"			= 'sound/voice/medbot/nooo.ogg',
+		"oh fuck"		= 'sound/voice/medbot/oh_fuck.ogg',
+		"put me back"	= 'sound/voice/medbot/please_put_me_back.ogg',
+		"good person" 	= 'sound/voice/medbot/youre_good.ogg'
 		)
 	spawn_flags = IC_SPAWN_RESEARCH
 
@@ -267,11 +279,12 @@
 	activators = list()
 	spawn_flags = IC_SPAWN_DEFAULT|IC_SPAWN_RESEARCH
 	power_draw_idle = 5 // Raises to 80 when on.
-	var/obj/machinery/camera/network/circuits/camera
+	var/obj/machinery/camera/camera
 
 /obj/item/integrated_circuit/output/video_camera/New()
 	..()
 	camera = new(src)
+	camera.network = list("rd")
 	on_data_written()
 
 /obj/item/integrated_circuit/output/video_camera/Destroy()
@@ -280,8 +293,9 @@
 
 /obj/item/integrated_circuit/output/video_camera/proc/set_camera_status(var/status)
 	if(camera)
-		camera.set_status(status)
-		power_draw_idle = camera.status ? 80 : 5
+		camera.status = status
+		GLOB.cameranet.updatePortableCamera(camera)
+		power_draw_idle = camera.status ? 20 : 0
 		if(camera.status) // Ensure that there's actually power.
 			if(!draw_idle_power())
 				power_fail()
@@ -290,8 +304,11 @@
 	if(camera)
 		var/cam_name = get_pin_data(IC_INPUT, 1)
 		var/cam_active = get_pin_data(IC_INPUT, 2)
+		var/list/new_network = get_pin_data(IC_INPUT, 3)
 		if(!isnull(cam_name))
 			camera.c_tag = cam_name
+		if(!isnull(new_network))
+			camera.network = new_network
 		set_camera_status(cam_active)
 
 /obj/item/integrated_circuit/output/video_camera/power_fail()
@@ -368,7 +385,7 @@
 	led_color = COLOR_PINK
 
 
-
+/* SKYRAT PORT -- Commented out for now, lots of nonfunctional code, might fix and make working later
 /obj/item/integrated_circuit/output/holographic_projector
 	name = "holographic projector"
 	desc = "This projects a holographic copy of an object."
@@ -445,7 +462,7 @@
 	if(!isnum(holo_scale) || !isnum(holo_rotation) )
 		return FALSE // Invalid.
 
-	hologram.adjust_scale(between(-2, holo_scale, 2) )
+	hologram.adjust_scale(clamp(-2, holo_scale, 2) )
 	hologram.adjust_rotation(holo_rotation)
 	update_hologram_position()
 
@@ -458,8 +475,8 @@
 	if(!isnum(holo_x) || !isnum(holo_y) )
 		return FALSE
 
-	holo_x = between(-7, holo_x, 7)
-	holo_y = between(-7, holo_y, 7)
+	holo_x = clamp(-7, holo_x, 7)
+	holo_y = clamp(-7, holo_y, 7)
 
 	var/turf/T = get_turf(src)
 	if(T)
@@ -514,3 +531,4 @@
 	if(hologram)
 		destroy_hologram()
 		set_pin_data(IC_INPUT, 1, FALSE)
+*/

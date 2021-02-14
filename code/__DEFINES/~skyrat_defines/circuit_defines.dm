@@ -53,3 +53,6 @@
 
 // Data limits.
 #define IC_MAX_LIST_LENGTH			500
+
+// Examining dummy
+#define DUMMY_HUMAN_SLOT_EXAMINER "dummy_examiner"

@@ -317,7 +317,7 @@
 	. = ..()
 	if(detail_color == COLOR_ASSEMBLY_BLACK) //Black colored overlay looks almost but not exactly like the base sprite, so just cut the overlay and avoid it looking kinda off.
 		return
-	. += mutable_appearance('icons/obj/assemblies/electronic_setups.dmi', "[icon_state]-color", color = detail_color)
+	. += mutable_appearance('modular_skyrat/modules/integrated_electronics/icons/obj/integrated_electronics/electronic_setups.dmi', "[icon_state]-color", color = detail_color)
 
 /obj/item/electronic_assembly/proc/return_total_complexity()
 	. = 0
@@ -450,7 +450,7 @@
 			return TRUE
 		else
 			for(var/obj/item/integrated_circuit/input/S in assembly_components)
-				S.attackby_react(I,user,user.a_intent)
+				S.attackby_react(I,user)
 			return ..()
 	else if(istype(I, /obj/item/multitool) || istype(I, /obj/item/integrated_electronics/wirer) || istype(I, /obj/item/integrated_electronics/debugger))
 		if(opened)
@@ -459,18 +459,18 @@
 		else
 			to_chat(user, "<span class='warning'>[src]'s hatch is closed, so you can't fiddle with the internal components.</span>")
 			for(var/obj/item/integrated_circuit/input/S in assembly_components)
-				S.attackby_react(I,user,user.a_intent)
+				S.attackby_react(I,user)
 			return ..()
 	else if(istype(I, /obj/item/stock_parts/cell))
 		if(!opened)
 			to_chat(user, "<span class='warning'>[src]'s hatch is closed, so you can't access \the [src]'s power supplier.</span>")
 			for(var/obj/item/integrated_circuit/input/S in assembly_components)
-				S.attackby_react(I,user,user.a_intent)
+				S.attackby_react(I,user)
 			return ..()
 		if(battery)
 			to_chat(user, "<span class='warning'>[src] already has \a [battery] installed. Remove it first if you want to replace it.</span>")
 			for(var/obj/item/integrated_circuit/input/S in assembly_components)
-				S.attackby_react(I,user,user.a_intent)
+				S.attackby_react(I,user)
 			return ..()
 		I.forceMove(src)
 		battery = I
@@ -483,7 +483,7 @@
 		detail_color = D.detail_color
 		update_icon()
 	else
-		if(user.a_intent != INTENT_HELP)
+		if(user.combat_mode)
 			return ..()
 		var/list/input_selection = list()
 		//Check all the components asking for an input
@@ -514,7 +514,7 @@
 			if(choice)
 				choice.additem(I, user)
 		for(var/obj/item/integrated_circuit/input/S in assembly_components)
-			S.attackby_react(I,user,user.a_intent)
+			S.attackby_react(I,user)
 		return ..()
 
 
@@ -707,6 +707,7 @@
 	icon_state = "setup_medium_med"
 	desc = "It's a case, for building medium-sized electronics with. This one resembles some type of medical apparatus."
 
+/* SKYRAT PORT -- TODO
 /obj/item/electronic_assembly/medium/gun
 	name = "type-e electronic mechanism"
 	icon_state = "setup_medium_gun"
@@ -715,6 +716,7 @@
 	lefthand_file = 'icons/mob/inhands/weapons/guns_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/weapons/guns_righthand.dmi'
 	can_fire_equipped = TRUE
+*/
 
 /obj/item/electronic_assembly/medium/radio
 	name = "type-f electronic mechanism"
@@ -857,8 +859,9 @@
 			pixel_x = -31
 		if(WEST)
 			pixel_x = 31
-	plane = ABOVE_WALL_PLANE
-
+	//plane = ABOVE_WALL_PLANE
+/*
 /obj/item/electronic_assembly/wallmount/Moved(atom/OldLoc, Dir, Forced = FALSE) //reset the plane if moved off the wall.
 	. = ..()
 	plane = GAME_PLANE
+*/

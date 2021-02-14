@@ -712,6 +712,7 @@
 			var/mob/LM = CHM
 			LM.playsound_local(get_turf(src), 'sound/machines/triple_beep.ogg', ASSEMBLY_BEEP_VOLUME, TRUE)
 
+/* SKYRAT PORT TODO -- Tg changed NTNet stuff completely I'll look at this later
 /obj/item/integrated_circuit/input/ntnet_packet
 	name = "NTNet networking circuit"
 	desc = "Enables the sending and receiving of messages over NTNet via packet data protocol."
@@ -811,6 +812,7 @@
 	set_pin_data(IC_OUTPUT, 2, data.broadcast)
 	push_data()
 	activate_pin(2)
+*/
 
 //This circuit gives information on where the machine is.
 /obj/item/integrated_circuit/input/gps
@@ -949,8 +951,8 @@
 	spawn_flags = IC_SPAWN_DEFAULT|IC_SPAWN_RESEARCH
 	power_draw_per_use = 20
 
-/obj/item/integrated_circuit/input/obj_scanner/attackby_react(var/atom/A,var/mob/user,intent)
-	if(intent!=INTENT_HELP)
+/obj/item/integrated_circuit/input/obj_scanner/attackby_react(var/atom/A,var/mob/living/user)
+	if(user.combat_mode)
 		return FALSE
 	if(!check_then_do_work())
 		return FALSE
@@ -1203,7 +1205,7 @@
 		"on read" = IC_PINTYPE_PULSE_OUT
 	)
 
-/obj/item/integrated_circuit/input/data_card_reader/attackby_react(obj/item/I, mob/living/user, intent)
+/obj/item/integrated_circuit/input/data_card_reader/attackby_react(obj/item/I, mob/living/user)
 	var/obj/item/card/data/card = I.GetCard()
 	var/write_mode = get_pin_data(IC_INPUT, 3)
 	if(card)

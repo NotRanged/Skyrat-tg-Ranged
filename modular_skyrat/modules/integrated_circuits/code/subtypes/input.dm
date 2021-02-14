@@ -293,7 +293,7 @@
 /obj/item/integrated_circuit/input/advanced_locator/on_data_written()
 	var/rad = get_pin_data(IC_INPUT, 2)
 	if(isnum(rad))
-		rad = CLAMP(rad, 0, 7)
+		rad = clamp(rad, 0, 7)
 		radius = rad
 
 /obj/item/integrated_circuit/input/advanced_locator/do_work()
@@ -349,6 +349,7 @@
 	var/frequency = 1457
 	var/code = 30
 	var/datum/radio_frequency/radio_connection
+	var/hearing_range = 3
 
 /obj/item/integrated_circuit/input/signaler/Initialize()
 	. = ..()
@@ -359,8 +360,7 @@
 	push_data()
 
 /obj/item/integrated_circuit/input/signaler/Destroy()
-	if(radio_controller)
-		radio_controller.remove_object(src,frequency)
+	SSradio.remove_object(src,frequency)
 	frequency = 0
 	. = ..()
 
@@ -377,23 +377,17 @@
 	if(!radio_connection)
 		return
 
-	var/datum/signal/signal = new()
-	signal.source = src
-	signal.encryption = code
-	signal.data["message"] = "ACTIVATE"
+	var/datum/signal/signal = new(list("code" = code))
 	radio_connection.post_signal(src, signal)
 	activate_pin(2)
+
 
 /obj/item/integrated_circuit/input/signaler/proc/set_frequency(new_frequency)
 	if(!frequency)
 		return
-	if(!radio_controller)
-		sleep(20)
-	if(!radio_controller)
-		return
-	radio_controller.remove_object(src, frequency)
+	SSradio.remove_object(src, frequency)
 	frequency = new_frequency
-	radio_connection = radio_controller.add_object(src, frequency, RADIO_CHAT)
+	radio_connection = SSradio.add_object(src, frequency, RADIO_SIGNALER)
 
 /obj/item/integrated_circuit/input/signaler/receive_signal(datum/signal/signal)
 	var/new_code = get_pin_data(IC_INPUT, 2)
@@ -403,17 +397,19 @@
 		code = new_code
 	if(!signal)
 		return FALSE
-	if(signal.encryption != code)
+	if(signal.data["code"] != code)
 		return FALSE
 	if(signal.source == src) // Don't trigger ourselves.
 		return FALSE
 
 	activate_pin(3)
+	audible_message("[icon2html(src, hearers(src))] *beep* *beep* *beep*", null, hearing_range)
+	for(var/CHM in get_hearers_in_view(hearing_range, src))
+		if(ismob(CHM))
+			var/mob/LM = CHM
+			LM.playsound_local(get_turf(src), 'sound/machines/triple_beep.ogg', ASSEMBLY_BEEP_VOLUME, TRUE)
 
-	if(loc)
-		for(var/mob/O in hearers(1, get_turf(src)))
-			O.show_message("[bicon(src)] *beep* *beep*", 3, "*beep* *beep*", 2)
-
+/* SKYRAT PORT -- We don't have exonet or communicators and I'm not fucking gonna
 /obj/item/integrated_circuit/input/EPv2
 	name = "\improper EPv2 circuit"
 	desc = "Enables the sending and receiving of messages on the Exonet with the EPv2 protocol."
@@ -467,6 +463,7 @@
 
 	push_data()
 	activate_pin(2)
+*/
 
 //This circuit gives information on where the machine is.
 /obj/item/integrated_circuit/input/gps
@@ -514,100 +511,19 @@
 	spawn_flags = IC_SPAWN_DEFAULT|IC_SPAWN_RESEARCH
 	power_draw_per_use = 15
 
-/obj/item/integrated_circuit/input/microphone/New()
-	..()
-	listening_objects |= src
-
-/obj/item/integrated_circuit/input/microphone/Destroy()
-	listening_objects -= src
-	return ..()
-
-/obj/item/integrated_circuit/input/microphone/hear_talk(mob/M, list/message_pieces, verb)
-	var/msg = multilingual_to_message(message_pieces, requires_machine_understands = TRUE)
-
+/obj/item/integrated_circuit/input/microphone/Hear(message, atom/movable/speaker, message_langs, raw_message, radio_freq, spans, message_mode, atom/movable/source)
+	. = ..()
 	var/translated = FALSE
-	if(M && msg)
-		for(var/datum/multilingual_say_piece/S in message_pieces)
-			// S.speaking && here is not redundant, it's preventing `S.speaking = null` from flagging
-			// as a translation, when it is not.
-			if(S.speaking && !istype(S.speaking, /datum/language/common))
+	if(speaker && message)
+		if(raw_message)
+			if(message_langs != get_selected_language())
 				translated = TRUE
-		set_pin_data(IC_OUTPUT, 1, M.GetVoice())
-		set_pin_data(IC_OUTPUT, 2, msg)
+		set_pin_data(IC_OUTPUT, 1, speaker.GetVoice())
+		set_pin_data(IC_OUTPUT, 2, raw_message)
 
 	push_data()
 	activate_pin(1)
 	if(translated)
-		activate_pin(2)
-
-/obj/item/integrated_circuit/input/microphone/sign
-	name = "sign-language translator"
-	desc = "Useful for spying on people or for sign activated machines."
-	extended_desc = "This will automatically translate galactic standard sign language it sees to Galactic Common.  \
-	The first activation pin is always pulsed when the circuit sees someone speak sign, while the second one \
-	is only triggered if it sees someone speaking a language other than sign language, which it will attempt to \
-	lip-read."
-	icon_state = "video_camera"
-	complexity = 12
-	inputs = list()
-	outputs = list(
-	"speaker" = IC_PINTYPE_STRING,
-	"message" = IC_PINTYPE_STRING
-	)
-	activators = list("on message received" = IC_PINTYPE_PULSE_OUT, "on translation" = IC_PINTYPE_PULSE_OUT)
-	spawn_flags = IC_SPAWN_RESEARCH
-	power_draw_per_use = 30
-
-	var/list/my_langs = list()
-	var/list/readable_langs = list(
-		LANGUAGE_GALCOM,
-		LANGUAGE_SOL_COMMON,
-		LANGUAGE_TRADEBAND,
-		LANGUAGE_GUTTER,
-		LANGUAGE_TERMINUS,
-		LANGUAGE_SIGN
-		)
-
-/obj/item/integrated_circuit/input/microphone/sign/Initialize()
-	..()
-	for(var/lang in readable_langs)
-		var/datum/language/newlang = GLOB.all_languages[lang]
-		my_langs |= newlang
-
-/obj/item/integrated_circuit/input/microphone/sign/hear_talk(mob/M, list/message_pieces, verb)
-	var/msg = multilingual_to_message(message_pieces)
-
-	var/translated = FALSE
-	if(M && msg)
-		for(var/datum/multilingual_say_piece/S in message_pieces)
-			if(S.speaking)
-				if(!((S.speaking.flags & NONVERBAL) || (S.speaking.flags & SIGNLANG)))
-					translated = TRUE
-					msg = stars(msg)
-					break
-		set_pin_data(IC_OUTPUT, 1, M.GetVoice())
-		set_pin_data(IC_OUTPUT, 2, msg)
-
-	push_data()
-	if(!translated)
-		activate_pin(1)
-	else
-		activate_pin(2)
-
-/obj/item/integrated_circuit/input/microphone/sign/hear_signlang(text, verb, datum/language/speaking, mob/M as mob)
-	var/translated = FALSE
-	if(M && text)
-		if(speaking)
-			if(!((speaking.flags & NONVERBAL) || (speaking.flags & SIGNLANG)))
-				translated = TRUE
-				text = speaking.scramble(text, my_langs)
-		set_pin_data(IC_OUTPUT, 1, M.GetVoice())
-		set_pin_data(IC_OUTPUT, 2, text)
-
-	push_data()
-	if(!translated)
-		activate_pin(1)
-	else
 		activate_pin(2)
 
 /obj/item/integrated_circuit/input/sensor
@@ -691,11 +607,11 @@
 	if(AM)
 
 
-		var/obj/item/weapon/cell/cell = null
-		if(istype(AM, /obj/item/weapon/cell)) // Is this already a cell?
+		var/obj/item/stock_parts/cell/cell = null
+		if(istype(AM, /obj/item/stock_parts/cell)) // Is this already a cell?
 			cell = AM
 		else // If not, maybe there's a cell inside it?
-			for(var/obj/item/weapon/cell/C in AM.contents)
+			for(var/obj/item/stock_parts/cell/C in AM.contents)
 				if(C) // Find one cell to charge.
 					cell = C
 					break
@@ -723,7 +639,7 @@
 		"oxygen"         = IC_PINTYPE_NUMBER,
 		"nitrogen"          = IC_PINTYPE_NUMBER,
 		"carbon dioxide"           = IC_PINTYPE_NUMBER,
-		"phoron"           = IC_PINTYPE_NUMBER,
+		"plasma"           = IC_PINTYPE_NUMBER,
 		"other"           = IC_PINTYPE_NUMBER
 	)
 	activators = list("scan" = IC_PINTYPE_PULSE_IN, "on scanned" = IC_PINTYPE_PULSE_OUT)
@@ -738,12 +654,13 @@
 
 	var/pressure = environment.return_pressure()
 	var/total_moles = environment.total_moles
+	var/list/env_gases = environment.gases
 
 	if (total_moles)
-		var/o2_level = environment.gas["oxygen"]/total_moles
-		var/n2_level = environment.gas["nitrogen"]/total_moles
-		var/co2_level = environment.gas["carbon_dioxide"]/total_moles
-		var/phoron_level = environment.gas["phoron"]/total_moles
+		var/o2_level = env_gases[/datum/gas/oxygen][MOLES]/total_moles
+		var/n2_level = env_gases[/datum/gas/nitrogen][MOLES]/total_moles
+		var/co2_level = env_gases[/datum/gas/carbon_dioxide][MOLES]/total_moles
+		var/phoron_level = env_gases[/datum/gas/plasma][MOLES]/total_moles
 		var/unknown_level =  1-(o2_level+n2_level+co2_level+phoron_level)
 		set_pin_data(IC_OUTPUT, 1, pressure)
 		set_pin_data(IC_OUTPUT, 2, round(environment.temperature-T0C,0.1))

@@ -1,6 +1,7 @@
 /obj/item/integrated_circuit/manipulation
 	category_text = "Manipulation"
 
+/* SKYRAT PORT -- This has been removed in the past, so commenting out saves effort on making this baycode work with tgcode lmao
 /obj/item/integrated_circuit/manipulation/weapon_firing
 	name = "weapon firing mechanism"
 	desc = "This somewhat complicated system allows one to slot in a gun, direct it towards a position, and remotely fire it."
@@ -98,6 +99,7 @@
 		if(!T)
 			return
 		installed_gun.Fire_userless(T)
+*/
 
 /obj/item/integrated_circuit/manipulation/locomotion
 	name = "locomotion circuit"
@@ -140,7 +142,7 @@
 	outputs = list()
 	activators = list("prime grenade" = IC_PINTYPE_PULSE_IN)
 	spawn_flags = IC_SPAWN_RESEARCH
-	var/obj/item/weapon/grenade/attached_grenade
+	var/obj/item/grenade/attached_grenade
 	var/pre_attached_grenade_type
 
 /obj/item/integrated_circuit/manipulation/grenade/New()
@@ -151,15 +153,15 @@
 
 /obj/item/integrated_circuit/manipulation/grenade/Destroy()
 	if(attached_grenade && !attached_grenade.active)
-		attached_grenade.dropInto(loc)
+		attached_grenade.forceMove(loc)
 	detach_grenade()
 	. =..()
 
-/obj/item/integrated_circuit/manipulation/grenade/attackby(var/obj/item/weapon/grenade/G, var/mob/user)
+/obj/item/integrated_circuit/manipulation/grenade/attackby(var/obj/item/grenade/G, var/mob/user)
 	if(istype(G))
 		if(attached_grenade)
 			to_chat(user, "<span class='warning'>There is already a grenade attached!</span>")
-		else if(user.unEquip(G, force=1))
+		else if(user.transferItemToLoc(G,src))
 			user.visible_message("<span class='warning'>\The [user] attaches \a [G] to \the [src]!</span>", "<span class='notice'>You attach \the [G] to \the [src].</span>")
 			attach_grenade(G)
 			G.forceMove(src)
@@ -169,7 +171,7 @@
 /obj/item/integrated_circuit/manipulation/grenade/attack_self(var/mob/user)
 	if(attached_grenade)
 		user.visible_message("<span class='warning'>\The [user] removes \an [attached_grenade] from \the [src]!</span>", "<span class='notice'>You remove \the [attached_grenade] from \the [src].</span>")
-		user.put_in_any_hand_if_possible(attached_grenade) || attached_grenade.dropInto(loc)
+		user.put_in_hands(attached_grenade)
 		detach_grenade()
 	else
 		..()
@@ -177,17 +179,19 @@
 /obj/item/integrated_circuit/manipulation/grenade/do_work()
 	if(attached_grenade && !attached_grenade.active)
 		var/datum/integrated_io/detonation_time = inputs[1]
+		var/dt
 		if(isnum(detonation_time.data) && detonation_time.data > 0)
-			attached_grenade.det_time = between(1, detonation_time.data, 12) SECONDS
-		attached_grenade.activate()
+			dt = clamp(detonation_time.data, 1, 12)*10
+		else
+			dt = 15
+		addtimer(CALLBACK(attached_grenade, /obj/item/grenade.proc/prime), dt)
 		var/atom/holder = loc
-		log_and_message_admins("activated a grenade assembly. Last touches: Assembly: [holder.fingerprintslast] Circuit: [fingerprintslast] Grenade: [attached_grenade.fingerprintslast]")
+		message_admins("activated a grenade assembly. Last touches: Assembly: [holder.fingerprintslast] Circuit: [fingerprintslast] Grenade: [attached_grenade.fingerprintslast]")
 
 // These procs do not relocate the grenade, that's the callers responsibility
-/obj/item/integrated_circuit/manipulation/grenade/proc/attach_grenade(var/obj/item/weapon/grenade/G)
+/obj/item/integrated_circuit/manipulation/grenade/proc/attach_grenade(var/obj/item/grenade/G)
 	attached_grenade = G
-	GLOB.destroyed_event.register(attached_grenade, src, /obj/item/integrated_circuit/manipulation/grenade/proc/detach_grenade)
-	size += G.w_class
+	G.forceMove(src)
 	desc += " \An [attached_grenade] is attached to it!"
 
 /obj/item/integrated_circuit/manipulation/grenade/proc/detach_grenade()
@@ -197,7 +201,3 @@
 	attached_grenade = null
 	size = initial(size)
 	desc = initial(desc)
-
-/obj/item/integrated_circuit/manipulation/grenade/frag
-	pre_attached_grenade_type = /obj/item/weapon/grenade/explosive
-	spawn_flags = null			// Used for world initializing, see the #defines above.

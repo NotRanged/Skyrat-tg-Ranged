@@ -59,7 +59,7 @@
 	spawn_flags = IC_SPAWN_RESEARCH
 
 /obj/item/integrated_circuit/passive/power/metabolic_siphon/proc/test_validity(var/mob/living/carbon/human/host)
-	if(!host || issynthetic(host) || host.stat == DEAD || host.nutrition <= 10)
+	if(!host || isrobotic(host) || host.stat == DEAD || host.nutrition <= 10)
 		return FALSE // Robots and dead people don't have a metabolism.
 	return TRUE
 
@@ -81,7 +81,7 @@
 	spawn_flags = IC_SPAWN_RESEARCH
 
 /obj/item/integrated_circuit/passive/power/metabolic_siphon/synthetic/test_validity(var/mob/living/carbon/human/host)
-	if(!host || !issynthetic(host) || host.stat == DEAD || host.nutrition <= 10)
+	if(!host || !isrobotic(host) || host.stat == DEAD || host.nutrition <= 10)
 		return FALSE // This time we don't want a metabolism.
 	return TRUE
 
@@ -128,7 +128,7 @@
 /obj/item/integrated_circuit/passive/power/chemical_cell/handle_passive_energy()
 	if(assembly)
 		for(var/I in fuel)
-			if((assembly.battery.maxcharge-assembly.battery.charge) / CELLRATE > fuel[I])
+			if((assembly.battery.maxcharge-assembly.battery.charge) / GLOB.CELLRATE > fuel[I])
 				if(reagents.remove_reagent(I, 1))
 					assembly.give_power(fuel[I])
 
@@ -200,7 +200,7 @@
 
 		if(should_act) // We're gonna give or take from the net.
 			if(drawing)
-				var/to_transfer = min(throughput, assembly.battery.amount_missing() / CELLRATE) // So we don't need to draw 10kW if the cell needs much less.
+				var/to_transfer = min(throughput, assembly.battery.amount_missing() / GLOB.CELLRATE) // So we don't need to draw 10kW if the cell needs much less.
 				var/amount = IO.draw_power(to_transfer)
 				assembly.give_power(amount)
 			else

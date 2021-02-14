@@ -281,7 +281,7 @@
 		if(battery)
 			to_chat(user, "<span class='warning'>\The [src] already has \a [battery] inside.  Remove it first if you want to replace it.</span>")
 			return FALSE
-		var/obj/item/weapon/cell/device/cell = I
+		var/obj/item/stock_parts/cell/cell = I
 		user.drop_item(cell)
 		cell.forceMove(src)
 		battery = cell

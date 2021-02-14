@@ -59,7 +59,7 @@
 	spawn_flags = IC_SPAWN_RESEARCH
 
 /obj/item/integrated_circuit/passive/power/metabolic_siphon/proc/test_validity(var/mob/living/carbon/human/host)
-	if(!host || host.isSynthetic() || host.stat == DEAD || host.nutrition <= 10)
+	if(!host || issynthetic(host) || host.stat == DEAD || host.nutrition <= 10)
 		return FALSE // Robots and dead people don't have a metabolism.
 	return TRUE
 
@@ -71,7 +71,7 @@
 			host = implant_assembly.implant.imp_in
 	if(host && test_validity(host))
 		assembly.give_power(10)
-		host.nutrition = max(host.nutrition - DEFAULT_HUNGER_FACTOR, 0)
+		host.nutrition = max(host.nutrition - HUNGER_FACTOR, 0)
 
 /obj/item/integrated_circuit/passive/power/metabolic_siphon/synthetic
 	name = "internal energy siphon"
@@ -81,7 +81,7 @@
 	spawn_flags = IC_SPAWN_RESEARCH
 
 /obj/item/integrated_circuit/passive/power/metabolic_siphon/synthetic/test_validity(var/mob/living/carbon/human/host)
-	if(!host || !host.isSynthetic() || host.stat == DEAD || host.nutrition <= 10)
+	if(!host || !issynthetic(host) || host.stat == DEAD || host.nutrition <= 10)
 		return FALSE // This time we don't want a metabolism.
 	return TRUE
 
@@ -104,7 +104,6 @@
 	icon_state = "chemical_cell"
 	extended_desc = "This is effectively an internal beaker. It will consume and produce power from phoron, slime jelly, welding fuel, carbon,\
 	 ethanol, nutriments and blood, in order of decreasing efficiency. It will consume fuel only if the battery can take more energy."
-	flags = OPENCONTAINER
 	complexity = 4
 	inputs = list()
 	outputs = list("volume used" = IC_PINTYPE_NUMBER,"self reference" = IC_PINTYPE_REF)
@@ -115,10 +114,10 @@
 
 /obj/item/integrated_circuit/passive/power/chemical_cell/New()
 	..()
-	create_reagents(volume)
+	create_reagents(volume, OPENCONTAINER)
 
 /obj/item/integrated_circuit/passive/power/chemical_cell/interact(mob/user)
-	set_pin_data(IC_OUTPUT, 2, weakref(src))
+	set_pin_data(IC_OUTPUT, 2, WEAKREF(src))
 	push_data()
 	..()
 
@@ -151,8 +150,8 @@
 		return
 	var/area/A = get_area(src)
 	if(A)
-		if(A.powered(EQUIP) && assembly.give_power(power_amount))
-			A.use_power_oneoff(power_amount, EQUIP)
+		if(A.powered(AREA_USAGE_EQUIP) && assembly.give_power(power_amount))
+			A.use_power(power_amount, AREA_USAGE_EQUIP)
 			// give_power() handles CELLRATE on its own.
 
 // Interacts with the powernet.

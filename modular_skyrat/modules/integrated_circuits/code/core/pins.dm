@@ -39,10 +39,11 @@ D [1]/  ||
 	data = null
 	holder = null
 	. = ..()
-
+	
+/* SKYRAT PORT - NanoUI stuff commented out, idk if it will cause issues
 /datum/integrated_io/nano_host()
 	return holder.nano_host()
-
+*/
 
 /datum/integrated_io/proc/data_as_type(var/as_type)
 	if(!isweakref(data))

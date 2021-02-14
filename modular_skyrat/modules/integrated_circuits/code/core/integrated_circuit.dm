@@ -52,11 +52,13 @@ a creative player the means to solve many problems.  Circuits are held inside an
 		qdel(A)
 	. = ..()
 
+/* SKYRAT PORT - NanoUI stuff commented out, idk if it will cause issues
 /obj/item/integrated_circuit/nano_host()
 	if(istype(src.loc, /obj/item/device/electronic_assembly))
 		var/obj/item/device/electronic_assembly/assembly = loc
 		return assembly.resolve_nano_host()
 	return ..()
+*/
 
 /obj/item/integrated_circuit/emp_act(severity)
 	for(var/datum/integrated_io/io in inputs + outputs + activators)
@@ -195,7 +197,7 @@ a creative player the means to solve many problems.  Circuits are held inside an
 
 	onclose(user, "assembly-\ref[src.assembly]")
 
-/obj/item/integrated_circuit/Topic(href, href_list, state = interactive_state)
+/obj/item/integrated_circuit/Topic(href, href_list)
 	if(!check_interactivity(usr))
 		return
 	if(..())

@@ -15,7 +15,7 @@
 	var/max_complexity = IC_COMPLEXITY_BASE
 	var/opened = FALSE
 	var/can_anchor = FALSE // If true, wrenching it will anchor it.
-	var/obj/item/weapon/cell/device/battery = null // Internal cell which most circuits need to work.
+	var/obj/item/stock_parts/cell/battery // Internal cell which most circuits need to work.
 	var/net_power = 0 // Set every tick, to display how much power is being drawn in total.
 	var/detail_color = COLOR_ASSEMBLY_BLACK
 
@@ -48,9 +48,10 @@
 
 
 
-
+/* SKYRAT PORT - NanoUI stuff commented out, idk if it will cause issues
 /obj/item/device/electronic_assembly/proc/resolve_nano_host()
 	return src
+*/
 
 /obj/item/device/electronic_assembly/proc/check_interactivity(mob/user)
 	if(!can_interact(user))
@@ -225,7 +226,7 @@
 	if(proximity)
 		var/scanned = FALSE
 		for(var/obj/item/integrated_circuit/input/sensor/S in contents)
-//			S.set_pin_data(IC_OUTPUT, 1, weakref(target))
+//			S.set_pin_data(IC_OUTPUT, 1, WEAKREF(target))
 //			S.check_then_do_work()
 			if(S.scan(target))
 				scanned = TRUE

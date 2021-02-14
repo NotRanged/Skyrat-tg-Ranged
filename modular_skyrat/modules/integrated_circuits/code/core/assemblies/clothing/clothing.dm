@@ -12,11 +12,13 @@
 	max_complexity = IC_COMPLEXITY_BASE
 	var/obj/item/clothing/clothing = null
 
+/* SKYRAT PORT - NanoUI stuff commented out, idk if it will cause issues
 /obj/item/device/electronic_assembly/clothing/nano_host()
 	return clothing
 
 /obj/item/device/electronic_assembly/clothing/resolve_nano_host()
 	return clothing
+*/
 
 /obj/item/device/electronic_assembly/clothing/update_icon()
 	..()

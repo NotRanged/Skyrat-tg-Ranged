@@ -53,9 +53,9 @@
 	return src
 
 /obj/item/device/electronic_assembly/proc/check_interactivity(mob/user)
-	if(!CanInteract(user, physical_state))
-		return 0
-	return 1
+	if(!can_interact(user))
+		return FALSE
+	return TRUE
 
 /obj/item/device/electronic_assembly/get_cell()
 	return battery
@@ -112,7 +112,7 @@
 
 /obj/item/device/electronic_assembly/Topic(href, href_list[])
 	if(..())
-		return 1
+		return TRUE
 
 	if(href_list["rename"])
 		rename(usr)

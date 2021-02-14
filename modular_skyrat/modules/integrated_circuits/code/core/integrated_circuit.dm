@@ -65,9 +65,9 @@ a creative player the means to solve many problems.  Circuits are held inside an
 /obj/item/integrated_circuit/proc/check_interactivity(mob/user)
 	if(assembly)
 		return assembly.check_interactivity(user)
-	else if(!CanInteract(user, physical_state))
-		return 0
-	return 1
+	else if(!can_interact(user))
+		return FALSE
+	return TRUE
 
 /obj/item/integrated_circuit/verb/rename_component()
 	set name = "Rename Circuit"
@@ -199,7 +199,7 @@ a creative player the means to solve many problems.  Circuits are held inside an
 	if(!check_interactivity(usr))
 		return
 	if(..())
-		return 1
+		return TRUE
 
 	var/update = 1
 	var/obj/item/device/electronic_assembly/A = src.assembly

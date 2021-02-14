@@ -121,7 +121,7 @@
 	if(!holder.check_interactivity(usr))
 		return
 	if(..())
-		return 1
+		return TRUE
 
 	if(href_list["add"])
 		add_to_list(usr)

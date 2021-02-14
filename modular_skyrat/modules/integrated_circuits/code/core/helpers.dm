@@ -21,7 +21,7 @@
 
 /obj/item/integrated_circuit/proc/set_pin_data(var/pin_type, var/pin_number, datum/new_data)
 	if (istype(new_data) && !isweakref(new_data))
-		new_data = weakref(new_data)
+		new_data = WEAKREF(new_data)
 	var/datum/integrated_io/pin = get_pin_ref(pin_type, pin_number)
 	return pin.write_data_to_pin(new_data)
 
@@ -65,11 +65,11 @@
 		var/obj/item/device/integrated_electronics/wirer/wirer = tool
 		if(pin)
 			wirer.wire(pin, usr)
-			return 1
+			return TRUE
 
 	else if(istype(tool, /obj/item/device/integrated_electronics/debugger))
 		var/obj/item/device/integrated_electronics/debugger/debugger = tool
 		if(pin)
 			debugger.write_data(pin, usr)
-			return 1
-	return 0
+			return TRUE
+	return FALSE

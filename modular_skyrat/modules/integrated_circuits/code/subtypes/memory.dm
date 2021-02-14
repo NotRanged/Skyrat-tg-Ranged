@@ -58,7 +58,6 @@
 	name = "large memory circuit"
 	desc = "This big circuit can hold eight pieces of data."
 	icon_state = "memory8"
-	origin_tech = list(TECH_ENGINEERING = 3, TECH_DATA = 3)
 	power_draw_per_use = 4
 	number_of_pins = 8
 
@@ -68,7 +67,6 @@
 	icon_state = "memory16"
 	w_class = WEIGHT_CLASS_NORMAL
 	spawn_flags = IC_SPAWN_RESEARCH
-	origin_tech = list(TECH_ENGINEERING = 4, TECH_DATA = 4)
 	power_draw_per_use = 8
 	number_of_pins = 16
 
@@ -89,7 +87,7 @@
 /obj/item/integrated_circuit/memory/constant/attack_self(mob/user)
 	var/datum/integrated_io/O = outputs[1]
 	var/type_to_use = input("Please choose a type to use.","[src] type setting") as null|anything in list("string","number","ref", "null")
-	if(!CanInteract(user, physical_state))
+	if(!can_interact(user))
 		return
 
 	var/new_data = null
@@ -97,13 +95,13 @@
 		if("string")
 			accepting_refs = 0
 			new_data = input("Now type in a string.","[src] string writing") as null|text
-			if(istext(new_data) && CanInteract(user, physical_state))
+			if(istext(new_data) && can_interact(user))
 				O.data = new_data
 				to_chat(user, "<span class='notice'>You set \the [src]'s memory to [O.display_data(O.data)].</span>")
 		if("number")
 			accepting_refs = 0
 			new_data = input("Now type in a number.","[src] number writing") as null|num
-			if(isnum(new_data) && CanInteract(user, physical_state))
+			if(isnum(new_data) && can_interact(user))
 				O.data = new_data
 				to_chat(user, "<span class='notice'>You set \the [src]'s memory to [O.display_data(O.data)].</span>")
 		if("ref")

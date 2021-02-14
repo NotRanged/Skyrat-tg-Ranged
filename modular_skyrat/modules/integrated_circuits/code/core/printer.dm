@@ -126,7 +126,7 @@
 
 /obj/item/device/integrated_circuit_printer/Topic(href, href_list)
 	if(..())
-		return 1
+		return TRUE
 
 	add_fingerprint(usr)
 
@@ -136,7 +136,7 @@
 	if(href_list["build"])
 		var/build_type = text2path(href_list["build"])
 		if(!build_type || !ispath(build_type))
-			return 1
+			return TRUE
 
 		var/cost = 1
 
@@ -156,7 +156,7 @@
 				to_chat(usr, "<span class='notice'>You are too far away from \the [src].</span>")
 			if(metal - cost < 0)
 				to_chat(usr, "<span class='warning'>You need [cost] metal to build that!.</span>")
-				return 1
+				return TRUE
 			metal -= cost
 		var/obj/item/built = new build_type(get_turf(loc))
 		usr.put_in_hands(built)
@@ -174,7 +174,6 @@
 	icon_state = "upgrade_disk"
 	item_state = "card-id"
 	w_class = WEIGHT_CLASS_SMALL
-	origin_tech = list(TECH_ENGINEERING = 3, TECH_DATA = 4)
 
 /obj/item/weapon/disk/integrated_circuit/upgrade/advanced
 	name = "integrated circuit printer upgrade disk - advanced designs"
@@ -185,4 +184,3 @@
 	name = "integrated circuit printer upgrade disk - circuit cloner"
 	desc = "Install this into your integrated circuit printer to enhance it.  This one allows the printer to duplicate assemblies."
 	icon_state = "upgrade_disk_clone"
-	origin_tech = list(TECH_ENGINEERING = 5, TECH_DATA = 6)

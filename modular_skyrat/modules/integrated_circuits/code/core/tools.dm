@@ -11,7 +11,7 @@
 	used for power or data transmission."
 	icon = 'modular_skyrat/modules/integrated_circuits/icons/obj/integrated_electronics/electronic_tools.dmi'
 	icon_state = "wirer-wire"
-	item_state = "wirer"
+	// item_state = "wirer" SKYRAT PORT todo icons
 	w_class = WEIGHT_CLASS_SMALL
 	var/datum/integrated_io/selected_io = null
 	var/mode = WIRE
@@ -268,7 +268,7 @@
 	can_hold = list(
 		/obj/item/integrated_circuit,
 		/obj/item/weapon/storage/bag/circuits/mini,
-		/obj/item/device/electronic_assembly,
+		/obj/item/electronic_assembly,
 		/obj/item/device/integrated_electronics,
 		/obj/item/weapon/tool/crowbar,
 		/obj/item/weapon/tool/screwdriver,
@@ -290,7 +290,7 @@
 	new /obj/item/weapon/storage/bag/circuits/mini/converter(src)
 	new /obj/item/weapon/storage/bag/circuits/mini/power(src)
 
-	new /obj/item/device/electronic_assembly(src)
+	new /obj/item/electronic_assembly(src)
 	new /obj/item/device/assembly/electronic_assembly(src)
 	new /obj/item/device/assembly/electronic_assembly(src)
 	new /obj/item/device/multitool(src)
@@ -314,10 +314,10 @@
 	new /obj/item/weapon/storage/bag/circuits/mini/converter/all(src)
 	new /obj/item/weapon/storage/bag/circuits/mini/power/all(src)
 
-	new /obj/item/device/electronic_assembly(src)
-	new /obj/item/device/electronic_assembly/medium(src)
-	new /obj/item/device/electronic_assembly/large(src)
-	new /obj/item/device/electronic_assembly/drone(src)
+	new /obj/item/electronic_assembly(src)
+	new /obj/item/electronic_assembly/medium(src)
+	new /obj/item/electronic_assembly/large(src)
+	new /obj/item/electronic_assembly/drone(src)
 	new /obj/item/device/integrated_electronics/wirer(src)
 	new /obj/item/device/integrated_electronics/debugger(src)
 	new /obj/item/weapon/tool/crowbar(src)

@@ -8,7 +8,7 @@
 	item_state = "circuitry"
 
 /obj/item/clothing/gloves/circuitry/Initialize()
-	setup_integrated_circuit(/obj/item/device/electronic_assembly/clothing/small)
+	setup_integrated_circuit(/obj/item/electronic_assembly/clothing/small)
 	return ..()
 
 /obj/item/clothing/gloves/circuitry/examine(mob/user)

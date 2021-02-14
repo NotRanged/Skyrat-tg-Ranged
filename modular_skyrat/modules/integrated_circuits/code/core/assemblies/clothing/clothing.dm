@@ -3,7 +3,7 @@
 // E.g. Glasses have less room than something worn over the chest.
 // Note that the electronic assembly is INSIDE the object that actually gets worn, in a similar way to implants.
 
-/obj/item/device/electronic_assembly/clothing
+/obj/item/electronic_assembly/clothing
 	name = "electronic clothing"
 	icon_state = "circuitry" // Needs to match the clothing's base icon_state.
 	desc = "It's a case, for building machines attached to clothing."
@@ -13,26 +13,26 @@
 	var/obj/item/clothing/clothing = null
 
 /* SKYRAT PORT - NanoUI stuff commented out, idk if it will cause issues
-/obj/item/device/electronic_assembly/clothing/nano_host()
+/obj/item/electronic_assembly/clothing/nano_host()
 	return clothing
 
-/obj/item/device/electronic_assembly/clothing/resolve_nano_host()
+/obj/item/electronic_assembly/clothing/resolve_nano_host()
 	return clothing
 */
 
-/obj/item/device/electronic_assembly/clothing/update_icon()
+/obj/item/electronic_assembly/clothing/update_icon()
 	..()
 	clothing.icon_state = icon_state
 	// We don't need to update the mob sprite since it won't (and shouldn't) actually get changed.
 
 // This is 'small' relative to the size of regular clothing assemblies.
-/obj/item/device/electronic_assembly/clothing/small
+/obj/item/electronic_assembly/clothing/small
 	max_components = IC_COMPONENTS_BASE / 2
 	max_complexity = IC_COMPLEXITY_BASE / 2
 	w_class = WEIGHT_CLASS_TINY
 
 // Ditto.
-/obj/item/device/electronic_assembly/clothing/large
+/obj/item/electronic_assembly/clothing/large
 	max_components = IC_COMPONENTS_BASE * 2
 	max_complexity = IC_COMPLEXITY_BASE * 2
 	w_class = WEIGHT_CLASS_NORMAL
@@ -42,7 +42,7 @@
 // Extra vars for clothing here
 */
 /obj/item/clothing/
-	var/obj/item/device/electronic_assembly/clothing/integrated_circuit = null
+	var/obj/item/electronic_assembly/clothing/integrated_circuit = null
 	var/obj/item/integrated_circuit/built_in/action_button/action_circuit = null // This gets pulsed when someone clicks the button on the hud.
 	actions_types = list(/datum/action/item_action/toggle_circuit)
 

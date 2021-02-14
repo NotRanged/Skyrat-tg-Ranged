@@ -54,8 +54,8 @@ a creative player the means to solve many problems.  Circuits are held inside an
 
 /* SKYRAT PORT - NanoUI stuff commented out, idk if it will cause issues
 /obj/item/integrated_circuit/nano_host()
-	if(istype(src.loc, /obj/item/device/electronic_assembly))
-		var/obj/item/device/electronic_assembly/assembly = loc
+	if(istype(src.loc, /obj/item/electronic_assembly))
+		var/obj/item/electronic_assembly/assembly = loc
 		return assembly.resolve_nano_host()
 	return ..()
 */
@@ -204,7 +204,7 @@ a creative player the means to solve many problems.  Circuits are held inside an
 		return TRUE
 
 	var/update = 1
-	var/obj/item/device/electronic_assembly/A = src.assembly
+	var/obj/item/electronic_assembly/A = src.assembly
 	var/update_to_assembly = 0
 	var/datum/integrated_io/pin = locate(href_list["pin"]) in inputs + outputs + activators
 	var/datum/integrated_io/linked = null
@@ -217,7 +217,7 @@ a creative player the means to solve many problems.  Circuits are held inside an
 		rename_component(usr)
 		if(href_list["from_assembly"])
 			update = 0
-			var/obj/item/device/electronic_assembly/ea = loc
+			var/obj/item/electronic_assembly/ea = loc
 			if(istype(ea))
 				ea.interact(usr)
 
@@ -332,7 +332,7 @@ a creative player the means to solve many problems.  Circuits are held inside an
 		if(!removable)
 			to_chat(usr, "<span class='warning'>\The [src] seems to be permanently attached to the case.</span>")
 			return
-		var/obj/item/device/electronic_assembly/ea = loc
+		var/obj/item/electronic_assembly/ea = loc
 		power_fail()
 		disconnect_all()
 		var/turf/T = get_turf(src)

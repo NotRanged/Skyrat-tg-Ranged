@@ -7,7 +7,7 @@
 	worn_state = "circuitry"
 
 /obj/item/clothing/under/circuitry/Initialize()
-	setup_integrated_circuit(/obj/item/device/electronic_assembly/clothing)
+	setup_integrated_circuit(/obj/item/electronic_assembly/clothing)
 	return ..()
 
 /obj/item/clothing/under/circuitry/examine(mob/user)

@@ -22,7 +22,6 @@
 		"light blue" = COLOR_ASSEMBLY_LBLUE,
 		"blue" = COLOR_ASSEMBLY_BLUE,
 		"purple" = COLOR_ASSEMBLY_PURPLE,
-		"hot pink" = COLOR_ASSEMBLY_HOT_PINK
 		)
 
 /obj/item/device/integrated_electronics/detailer/Initialize()

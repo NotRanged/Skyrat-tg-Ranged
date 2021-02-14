@@ -4,7 +4,7 @@
 	icon_state = "setup_device"
 	var/opened = 0
 
-	var/obj/item/device/electronic_assembly/device/EA
+	var/obj/item/electronic_assembly/device/EA
 
 /obj/item/device/assembly/electronic_assembly/New()
 	EA = new(src)
@@ -60,7 +60,7 @@
 	toggle_open(usr)
 
 
-/obj/item/device/electronic_assembly/device
+/obj/item/electronic_assembly/device
 	name = "electronic device"
 	icon_state = "setup_device"
 	desc = "It's a tiny electronic device with specific use for attaching to other devices."
@@ -70,14 +70,14 @@
 	max_complexity = IC_COMPLEXITY_BASE * 3/4
 
 
-/obj/item/device/electronic_assembly/device/New()
+/obj/item/electronic_assembly/device/New()
 	..()
 	var/obj/item/integrated_circuit/built_in/device_input/input = new(src)
 	var/obj/item/integrated_circuit/built_in/device_output/output = new(src)
 	input.assembly = src
 	output.assembly = src
 
-/obj/item/device/electronic_assembly/device/check_interactivity(mob/user)
+/obj/item/electronic_assembly/device/check_interactivity(mob/user)
 	if(!can_interact(user))
 		return FALSE
 	return TRUE

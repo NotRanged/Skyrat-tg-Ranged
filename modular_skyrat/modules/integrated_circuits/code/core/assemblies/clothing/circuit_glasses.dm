@@ -8,7 +8,7 @@
 	item_state = "night" // The on-mob sprite would be identical anyways.
 
 /obj/item/clothing/glasses/circuitry/Initialize()
-	setup_integrated_circuit(/obj/item/device/electronic_assembly/clothing/small)
+	setup_integrated_circuit(/obj/item/electronic_assembly/clothing/small)
 	return ..()
 
 /obj/item/clothing/glasses/circuitry/examine(mob/user)
